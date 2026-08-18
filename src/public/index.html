@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JARVIS</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="particles">
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+  </div>
+
+  <main class="stage">
+    <header class="hud-top">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span id="brand-name">JARVIS</span>
+      </div>
+      <div class="hud-meta">
+        <span id="conn-status" class="badge badge-off">OFFLINE</span>
+      </div>
+    </header>
+
+    <section class="core-area" id="holo-wrap">
+      <div class="holo-ring"></div>
+      <canvas id="holo"></canvas>
+      <div class="status-line">
+        <span class="status-led"></span>
+        <span id="status-text">INITIALIZING</span>
+      </div>
+    </section>
+
+    <section class="log-panel" id="log-panel">
+      <div id="log" class="log"></div>
+      <div id="live" class="log-live"></div>
+    </section>
+
+    <footer class="controls">
+      <div class="ctrl-left">
+        <button id="btn-listen" class="btn btn-primary" title="Press and hold to talk">
+          <span class="mic-icon"></span> HOLD TO TALK
+        </button>
+        <label class="switch">
+          <input type="checkbox" id="toggle-always" />
+          <span class="slider"></span>
+          <span class="switch-label">Always listen</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="toggle-voice" checked />
+          <span class="slider"></span>
+          <span class="switch-label">Voice replies</span>
+        </label>
+      </div>
+      <div class="ctrl-right">
+        <input id="type-box" type="text" placeholder="Type a message to Jarvis..." autocomplete="off" />
+        <button id="btn-send" class="btn">SEND</button>
+      </div>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/app.js"></script>
+  <script type="module" src="/scene.js"></script>
+</body>
+</html>
