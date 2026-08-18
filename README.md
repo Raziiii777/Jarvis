@@ -1,3 +1,4 @@
+<img width="846" height="885" alt="Screenshot 2026-08-18 at 4 42 24 PM" src="https://github.com/user-attachments/assets/93b0f572-7a6b-4d0f-84ba-5eadf231a7e7" />
 # JARVIS
 
 A real-time AI voice assistant for macOS with a 3D holographic interface.
