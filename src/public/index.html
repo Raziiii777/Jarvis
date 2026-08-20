@@ -1,73 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JARVIS</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>JARVIS — Command Center</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@400;700;900&display=swap');
+  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <div class="bg-grid"></div>
+<body class="state-idle">
+
+  <!-- Matrix Rain Background -->
+  <canvas id="matrix-bg"></canvas>
+
+  <!-- Scanlines Overlay -->
   <div class="scanlines"></div>
-  <div class="vignette"></div>
-  <div class="particles">
-    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
-    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
-    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
-    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
-  </div>
 
-  <main class="stage">
-    <header class="hud-top">
-      <div class="brand">
-        <span class="brand-dot"></span>
-        <span id="brand-name">JARVIS</span>
-      </div>
-      <div class="hud-meta">
-        <span id="conn-status" class="badge badge-off">OFFLINE</span>
-      </div>
-    </header>
-
-    <section class="core-area" id="holo-wrap">
-      <div class="holo-ring"></div>
-      <canvas id="holo"></canvas>
-      <div class="status-line">
-        <span class="status-led"></span>
-        <span id="status-text">INITIALIZING</span>
-      </div>
-    </section>
-
-    <section class="log-panel" id="log-panel">
-      <div id="log" class="log"></div>
-      <div id="live" class="log-live"></div>
-    </section>
-
-    <footer class="controls">
-      <div class="ctrl-left">
-        <button id="btn-listen" class="btn btn-primary" title="Press and hold to talk">
-          <span class="mic-icon"></span> HOLD TO TALK
-        </button>
-        <label class="switch">
-          <input type="checkbox" id="toggle-always" />
-          <span class="slider"></span>
-          <span class="switch-label">Always listen</span>
-        </label>
-        <label class="switch">
-          <input type="checkbox" id="toggle-voice" checked />
-          <span class="slider"></span>
-          <span class="switch-label">Voice replies</span>
-        </label>
-      </div>
-      <div class="ctrl-right">
-        <input id="type-box" type="text" placeholder="Type a message to Jarvis..." autocomplete="off" />
-        <button id="btn-send" class="btn">SEND</button>
-      </div>
-    </footer>
-  </main>
-
+  <!-- Toast -->
   <div id="toast" class="toast hidden"></div>
 
-  <script src="/app.js"></script>
-  <script type="module" src="/scene.js"></script>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="brand"><span class="brand-icon">⬡</span><span id="brand-name">JARVIS</span></div>
+      <div class="status-row">
+        <span id="conn-status" class="badge badge-off">OFFLINE</span>
+        <span id="status-text" class="status-label">STANDBY</span>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="clock">
+        <div class="clock-main"><span id="clock-time">00:00:00</span><span id="clock-ampm" class="ampm">AM</span></div>
+        <div class="clock-sub"><span id="clock-date">---</span><span class="clock-sep">|</span><span id="clock-day">---</span></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="control-group">
+        <button id="btn-listen" class="btn pulse-glow" aria-label="Push to Talk">🎙 HOLD TO TALK</button>
+        <div class="controls">
+          <label class="toggle"><input type="checkbox" id="toggle-always" checked><span class="slider"></span><span class="label-text">ALWAYS LISTEN</span></label>
+          <label class="toggle"><input type="checkbox" id="toggle-voice" checked><span class="slider"></span><span class="label-text">VOICE REPLY</span></label>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- LANGUAGE SWITCHER -->
+  <nav class="lang-bar">
+    <button class="lang-btn active" data-lang="en">English</button>
+    <button class="lang-btn" data-lang="hi">हिन्दी</button>
+    <button class="lang-btn" data-lang="ur">اردو</button>
+    <button class="lang-btn" data-lang="zh">中文</button>
+    <button class="lang-btn" data-lang="ja">日本語</button>
+  </nav>
+
+  <!-- MAIN GRID: 3 columns -->
+  <main class="main-grid">
+
+    <!-- LEFT COLUMN -->
+    <section class="col-left">
+
+      <!-- System Status -->
+      <div class="panel glass" data-i18n-title="system_status">
+        <div class="panel-title"><span class="blink-dot"></span>SYSTEM STATUS</div>
+        <div class="sys-grid">
+          <div class="sys-item"><span class="sys-label" data-i18n="battery">Battery</span><span id="sys-battery" class="sys-val">--%</span><div class="bar-track"><div id="sys-battery-bar" class="bar-fill"></div></div></div>
+          <div class="sys-item"><span class="sys-label" data-i18n="memory">Memory</span><span id="sys-memory" class="sys-val">--%</span><div class="bar-track"><div id="sys-memory-bar" class="bar-fill"></div></div></div>
+          <div class="sys-item"><span class="sys-label" data-i18n="cpu">CPU</span><span id="sys-cpu" class="sys-val">--%</span><div class="bar-track"><div id="sys-cpu-bar" class="bar-fill"></div></div></div>
+          <div class="sys-item"><span class="sys-label" data-i18n="disk">Disk</span><span id="sys-disk" class="sys-val">--%</span><div class="bar-track"><div id="sys-disk-bar" class="bar-fill"></div></div></div>
+        </div>
+        <div class="sys-uptime"><span data-i18n="uptime">Uptime</span> <span id="sys-uptime" class="mono">00:00:00</span></div>
+      </div>
+
+      <!-- Weather Grid -->
+      <div class="panel glass" data-i18n-title="global_weather">
+        <div class="panel-title">🌍 <span data-i18n="global_weather">GLOBAL WEATHER</span></div>
+        <div class="wx-local">
+          <span id="local-temp" class="wx-big-temp">--°C</span>
+          <span id="local-cond" class="wx-big-cond">--</span>
+          <span class="wx-label" data-i18n="local">Local</span>
+        </div>
+        <div id="weather-grid" class="wx-grid"></div>
+      </div>
+
+      <!-- US Stocks -->
+      <div class="panel glass" data-i18n-title="us_stocks">
+        <div class="panel-title">📈 <span data-i18n="us_stocks">US MARKETS</span></div>
+        <div id="market-list" class="market-list"></div>
+      </div>
+
+      <!-- Memory Stream -->
+      <div class="panel glass panel-compact" data-i18n-title="memory_stream">
+        <div class="panel-title">▮ <span data-i18n="memory_stream">MEMORY STREAM</span></div>
+        <pre id="memory-stream" class="memory-stream"></pre>
+      </div>
+
+    </section>
+
+    <!-- CENTER COLUMN: Map + Hologram + Chat -->
+    <section class="col-center">
+
+      <!-- World Map -->
+      <div class="panel glass map-panel" data-i18n-title="world_map">
+        <div class="panel-title">🗺 <span data-i18n="world_map">WORLD MAP — LIVE TRACKER</span></div>
+        <div id="world-map" class="world-map"></div>
+        <div class="map-legend">
+          <span class="legend-item"><span class="legend-dot dot-cyan"></span> <span data-i18n="active_node">Active Node</span></span>
+          <span class="legend-item"><span class="legend-dot dot-green"></span> <span data-i18n="weather_station">Weather Station</span></span>
+          <span class="legend-item"><span class="legend-dot dot-amber"></span> <span data-i18n="news_source">News Source</span></span>
+        </div>
+      </div>
+
+      <!-- Hologram + Chat row -->
+      <div class="center-bottom-row">
+        <!-- Hologram -->
+        <div class="panel glass holo-panel">
+          <div class="panel-title holo-title"><span class="blink-dot"></span> NEURAL CORE</div>
+          <div class="hologram-container">
+            <canvas id="hologram-canvas"></canvas>
+            <div class="holo-label">
+              <span class="live-dot"></span> NEURAL CORE
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat / Voice Log -->
+        <div class="panel glass chat-panel">
+          <div class="panel-title">💬 <span data-i18n="communication_log">COMMUNICATION LOG</span></div>
+          <div id="log" class="log"></div>
+        <div class="chat-input-row">
+          <span class="live-indicator" id="live">_</span>
+          <input id="type-box" class="input" type="text" placeholder="Type a command..." data-i18n-placeholder="type_command">
+          <button id="btn-send" class="btn btn-send">SEND ➤</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN -->
+    <section class="col-right">
+
+      <!-- World Regions -->
+      <div class="panel glass" data-i18n-title="world_regions">
+        <div class="panel-title">🌐 <span data-i18n="world_regions">WORLD REGIONS</span></div>
+        <div class="region-grid">
+          <div class="region-item"><span class="region-name">Americas</span><span id="region-americas" class="region-count">0</span></div>
+          <div class="region-item"><span class="region-name">Europe</span><span id="region-europe" class="region-count">0</span></div>
+          <div class="region-item"><span class="region-name">Middle East</span><span id="region-mideast" class="region-count">0</span></div>
+          <div class="region-item"><span class="region-name">Asia</span><span id="region-asia" class="region-count">0</span></div>
+          <div class="region-item"><span class="region-name">Global</span><span id="region-global" class="region-count">0</span></div>
+        </div>
+      </div>
+
+      <!-- Tech News -->
+      <div class="panel glass" data-i18n-title="tech_news">
+        <div class="panel-title">💻 <span data-i18n="tech_news">TECHNOLOGY</span></div>
+        <div id="tech-list" class="news-scroll"></div>
+      </div>
+
+      <!-- Breaking News -->
+      <div class="panel glass" data-i18n-title="breaking_news">
+        <div class="panel-title">🚨 <span data-i18n="breaking_news">BREAKING NEWS</span></div>
+        <div id="breaking-list" class="news-scroll"></div>
+      </div>
+
+      <!-- Radio -->
+      <div class="panel glass" data-i18n-title="live_radio">
+        <div class="panel-title">📻 <span data-i18n="live_radio">LIVE RADIO</span></div>
+        <div class="radio-row">
+          <div id="radio-icon" class="radio-icon">♪</div>
+          <div class="radio-info">
+            <span id="radio-station" class="radio-station">BBC World Service</span>
+            <span id="radio-status" class="radio-status">READY</span>
+          </div>
+          <button id="radio-play" class="btn btn-radio">▶</button>
+        </div>
+        <div class="radio-btns">
+          <button class="radio-btn active" data-stream="https://stream.live.vc.bbcmedia.co.uk/bbc_world_service">BBC World</button>
+          <button class="radio-btn" data-stream="https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one">BBC Radio 1</button>
+          <button class="radio-btn" data-stream="https://live.wostreaming.net/direct/pprod-bbclive-bbcworldwm-ibc1">NPR Live</button>
+          <button class="radio-btn" data-stream="https:// streams.ilovemusic.de/iloveradio17.mp3">Lofi Hip Hop</button>
+        </div>
+      </div>
+
+      <!-- News Ticker -->
+      <div class="ticker-bar">
+        <span class="ticker-label">LIVE</span>
+        <div class="ticker-wrap"><span id="ticker-text" class="ticker-text">System initializing...</span></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.185.1/build/three.module.js"
+    }
+  }
+  </script>
+  <script type="module" src="scene.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
