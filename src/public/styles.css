@@ -127,20 +127,20 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 /* ========== WORLD MAP ========== */
 .map-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .world-map { flex: 1; min-height: 250px; border-radius: 0 0 var(--radius) var(--radius); position: relative; }
-.leaflet-container { background: #06101f !important; height: 100% !important; width: 100% !important; }
-.leaflet-tile-pane { filter: sepia(1) hue-rotate(175deg) saturate(3.5) brightness(0.75) contrast(1.1); }
-.leaflet-tile-pane::after { content: ''; position: absolute; inset: 0; background: rgba(0,80,200,0.25); pointer-events: none; mix-blend-mode: multiply; }
-.leaflet-control-zoom { border: 1px solid var(--border2) !important; }
-.leaflet-control-zoom a { background: var(--bg3) !important; color: var(--cyan) !important; border-color: var(--border2) !important; }
-.leaflet-control-zoom a:hover { background: var(--cyan-dim) !important; }
+.leaflet-container { background: #070b14 !important; height: 100% !important; width: 100% !important; }
+.leaflet-tile-pane { filter: invert(1) saturate(2) brightness(0.4) contrast(1.5); }
+.leaflet-tile-pane::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,0,128,0.25) 0%, rgba(0,255,255,0.2) 50%, rgba(180,0,255,0.25) 100%); pointer-events: none; mix-blend-mode: screen; }
+.leaflet-control-zoom { border: 1px solid rgba(255,0,128,0.3) !important; }
+.leaflet-control-zoom a { background: rgba(10,10,30,0.9) !important; color: #ff0080 !important; border-color: rgba(255,0,128,0.3) !important; }
+.leaflet-control-zoom a:hover { background: rgba(255,0,128,0.15) !important; color: #ff3399 !important; }
 .map-legend { display: flex; gap: 16px; padding: 6px 12px; border-top: 1px solid var(--border); font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px; }
 .legend-item { display: flex; align-items: center; gap: 5px; }
 .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
-.dot-cyan { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
-.dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
-.dot-amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
-.leaflet-popup-content-wrapper { background: var(--bg3) !important; color: var(--text) !important; border: 1px solid var(--border2) !important; border-radius: 8px !important; font-family: var(--font) !important; font-size: 11px !important; }
-.leaflet-popup-tip { background: var(--bg3) !important; }
+.dot-cyan { background: #00ffff; box-shadow: 0 0 8px #00ffff, 0 0 16px rgba(0,255,255,0.4); }
+.dot-green { background: #00ff88; box-shadow: 0 0 8px #00ff88, 0 0 16px rgba(0,255,136,0.4); }
+.dot-amber { background: #ff0080; box-shadow: 0 0 8px #ff0080, 0 0 16px rgba(255,0,128,0.4); }
+.leaflet-popup-content-wrapper { background: rgba(10,10,30,0.95) !important; color: #00ffff !important; border: 1px solid rgba(255,0,128,0.4) !important; border-radius: 8px !important; font-family: var(--font) !important; font-size: 11px !important; box-shadow: 0 0 20px rgba(255,0,128,0.2), 0 0 40px rgba(0,255,255,0.1) !important; }
+.leaflet-popup-tip { background: rgba(10,10,30,0.95) !important; }
 .leaflet-popup-content { margin: 8px 12px !important; }
 
 /* ========== CHAT ========== */

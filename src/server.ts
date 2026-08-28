@@ -4,6 +4,7 @@ import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
+import { networkInterfaces } from "node:os";
 import { WebSocketServer, WebSocket } from "ws";
 import { config } from "./config.js";
 import { Brain, ConvoMsg } from "./brain.js";
@@ -27,6 +28,16 @@ const MIME: Record<string, string> = {
   ".webp": "image/webp",
   ".gif": "image/gif",
 };
+
+function getLocalIP(): string {
+  const nets = networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name] ?? []) {
+      if (net.family === "IPv4" && !net.internal) return net.address;
+    }
+  }
+  return "localhost";
+}
 
 function sanitizePath(urlPath: string): string {
   const decoded = decodeURIComponent(urlPath.split("?")[0]);
@@ -360,8 +371,9 @@ export function startServer(brain: Brain): void {
     } catch {}
   }, 60000);
 
-  server.listen(config.port, "127.0.0.1", () => {
+  server.listen(config.port, "0.0.0.0", () => {
     console.log(`\n  ${config.name} is online.`);
-    console.log(`  Open  http://127.0.0.1:${config.port}  in Safari or Chrome to talk.\n`);
+    console.log(`  Local:   http://127.0.0.1:${config.port}`);
+    console.log(`  Network: http://${getLocalIP()}:${config.port}\n`);
   });
 }

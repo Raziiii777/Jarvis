@@ -133,9 +133,9 @@
       zoomControl: false, attributionControl: false, scrollWheelZoom: true,
       worldCopyJump: true
     });
-    /* blue-tinted map: use standard OSM tiles (reliable) + CSS makes it blue */
+    /* dark tiles via CSS filter - no API key needed */
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      subdomains: "abc", maxZoom: 19
+      subdomains: "abc", maxZoom: 19, opacity: 0.6
     }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
@@ -170,16 +170,16 @@
       { name: "Bangalore", lat: 12.97, lon: 77.59 },
     ];
 
-    const cyanIcon = L.divIcon({ className: "", html: '<div style="width:8px;height:8px;border-radius:50%;background:#2fd6ff;box-shadow:0 0 8px #2fd6ff;border:1px solid rgba(47,214,255,0.5);"></div>', iconSize: [8, 8], iconAnchor: [4, 4] });
-    const greenIcon = L.divIcon({ className: "", html: '<div style="width:7px;height:7px;border-radius:50%;background:#00ff88;box-shadow:0 0 6px #00ff88;"></div>', iconSize: [7, 7], iconAnchor: [4, 4] });
-    const amberIcon = L.divIcon({ className: "", html: '<div style="width:7px;height:7px;border-radius:50%;background:#ffb900;box-shadow:0 0 6px #ffb900;"></div>', iconSize: [7, 7], iconAnchor: [4, 4] });
+    const cyanIcon = L.divIcon({ className: "", html: '<div style="width:10px;height:10px;border-radius:50%;background:#00ffff;box-shadow:0 0 12px #00ffff,0 0 24px rgba(0,255,255,0.4);border:1px solid rgba(0,255,255,0.6);"></div>', iconSize: [10, 10], iconAnchor: [5, 5] });
+    const greenIcon = L.divIcon({ className: "", html: '<div style="width:9px;height:9px;border-radius:50%;background:#00ff88;box-shadow:0 0 10px #00ff88,0 0 20px rgba(0,255,136,0.4);"></div>', iconSize: [9, 9], iconAnchor: [5, 5] });
+    const amberIcon = L.divIcon({ className: "", html: '<div style="width:9px;height:9px;border-radius:50%;background:#ff0080;box-shadow:0 0 10px #ff0080,0 0 20px rgba(255,0,128,0.4);"></div>', iconSize: [9, 9], iconAnchor: [5, 5] });
 
     cities.forEach(c => {
       const m = L.marker([c.lat, c.lon], { icon: cyanIcon }).addTo(map).bindPopup('<b>' + c.name + '</b><br>Loading weather...');
       mapMarkers.push({ marker: m, city: c.name, type: "weather" });
     });
-    newsHubs.forEach(c => L.marker([c.lat, c.lon], { icon: amberIcon }).addTo(map).bindPopup('<b>' + c.name + '</b><br>News Source'));
-    techHubs.forEach(c => L.marker([c.lat, c.lon], { icon: greenIcon }).addTo(map).bindPopup('<b>' + c.name + '</b><br>Tech Hub'));
+    newsHubs.forEach(c => L.marker([c.lat, c.lon], { icon: amberIcon }).addTo(map).bindPopup('<div style="color:#ff0080;font-family:monospace;"><b>' + c.name + '</b><br>News Source</div>'));
+    techHubs.forEach(c => L.marker([c.lat, c.lon], { icon: greenIcon }).addTo(map).bindPopup('<div style="color:#00ff88;font-family:monospace;"><b>' + c.name + '</b><br>Tech Hub</div>'));
   }
 
   function updateMapWeather(weatherData) {
@@ -187,7 +187,7 @@
     weatherData.forEach(wx => {
       const entry = mapMarkers.find(m => m.city === wx.city && m.type === "weather");
       if (entry) {
-        entry.marker.setPopupContent('<b>' + wx.city + '</b><br>' + wx.temp + '°C — ' + wx.condition + '<br>Wind: ' + wx.wind + ' km/h | Humidity: ' + wx.humidity + '%');
+        entry.marker.setPopupContent('<div style="color:#00ffff;font-family:monospace;"><b style="color:#ff0080;">' + wx.city + '</b><br>' + wx.temp + '°C — ' + wx.condition + '<br>Wind: ' + wx.wind + ' km/h | Humidity: ' + wx.humidity + '%</div>');
       }
     });
   }
