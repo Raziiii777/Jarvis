@@ -65,9 +65,14 @@ function fallback(text: string): { reply: string; usedTool?: string } {
 
 export class Brain {
   hasLLM: boolean;
+  private providers: { name: string; baseUrl: string; apiKey: string; model: string }[];
 
   constructor() {
-    this.hasLLM = Boolean(config.openai.apiKey);
+    this.providers = [];
+    if (config.openai.apiKey) this.providers.push({ name: "OpenAI", ...config.openai });
+    if (config.groq.apiKey) this.providers.push({ name: "Groq", baseUrl: config.groq.baseUrl, apiKey: config.groq.apiKey, model: config.groq.model });
+    this.hasLLM = this.providers.length > 0;
+    if (this.hasLLM) console.log(`[brain] Providers: ${this.providers.map(p => p.name).join(" → ")}`);
   }
 
   async respond(text: string, history: ConvoMsg[]): Promise<ConvoMsg> {
@@ -117,55 +122,60 @@ export class Brain {
   private async llmRespond(text: string, history: ConvoMsg[]): Promise<ConvoMsg> {
     const messages: ConvoMsg[] = [
       { role: "system", content: config.systemPrompt },
-      ...history.slice(-10),
+      ...history.slice(-50),
       { role: "user", content: text },
     ];
 
-    for (let i = 0; i < 5; i++) {
-      const res = await fetch(`${config.openai.baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.openai.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: config.openai.model,
-          messages,
-          tools: toolSchemas(),
-          tool_choice: "auto",
-        }),
-      });
-      if (!res.ok) {
-        const body = await res.text();
-        return { role: "assistant", content: `I ran into a problem talking to my language model (${res.status}). ${body.slice(0, 200)}` };
-      }
-      const data = (await res.json()) as {
-        choices: { message: ConvoMsg }[];
-      };
-      const msg = data.choices[0]?.message;
-
-      const calls = (msg.tool_calls as { id: string; function: { name: string; arguments: string } }[]) ?? [];
-      if (calls.length === 0) {
-        return { role: "assistant", content: msg.content ?? "" };
-      }
-
-      messages.push(msg);
-      for (const call of calls) {
-        let parsed: Record<string, unknown> = {};
+    for (const provider of this.providers) {
+      for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          parsed = JSON.parse(call.function.arguments || "{}");
-        } catch {
-          parsed = {};
+          console.log(`[brain] Trying ${provider.name} (${provider.model})...`);
+          const res = await fetch(`${provider.baseUrl}/chat/completions`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${provider.apiKey}`,
+            },
+            body: JSON.stringify({
+              model: provider.model,
+              messages,
+              tools: toolSchemas(),
+              tool_choice: "auto",
+              max_tokens: 4096,
+            }),
+          });
+          
+          if (!res.ok) {
+            const body = await res.text();
+            console.log(`[brain] ${provider.name} failed (${res.status}): ${body.slice(0, 100)}`);
+            if (res.status === 429 || res.status >= 500) continue; // retry or try next provider
+            continue;
+          }
+          
+          const data = (await res.json()) as { choices: { message: ConvoMsg }[] };
+          const msg = data.choices[0]?.message;
+          const calls = (msg.tool_calls as { id: string; function: { name: string; arguments: string } }[]) ?? [];
+          
+          if (calls.length === 0) {
+            console.log(`[brain] ${provider.name} responded successfully`);
+            return { role: "assistant", content: msg.content ?? "" };
+          }
+
+          messages.push(msg);
+          for (const call of calls) {
+            let parsed: Record<string, unknown> = {};
+            try { parsed = JSON.parse(call.function.arguments || "{}"); } catch { parsed = {}; }
+            const result = await runTool(call.function.name, parsed);
+            messages.push({ role: "tool", tool_call_id: call.id, name: call.function.name, content: result });
+          }
+          // If tool calls, loop again with same provider
+        } catch (e) {
+          console.log(`[brain] ${provider.name} error: ${e instanceof Error ? e.message : String(e)}`);
+          continue;
         }
-        const result = await runTool(call.function.name, parsed);
-        messages.push({
-          role: "tool",
-          tool_call_id: call.id,
-          name: call.function.name,
-          content: result,
-        });
       }
+      console.log(`[brain] ${provider.name} exhausted, trying next provider...`);
     }
-    return { role: "assistant", content: "I'm having trouble with that request." };
+    return { role: "assistant", content: "I'm having trouble connecting to my language models. Please check the API keys." };
   }
 }

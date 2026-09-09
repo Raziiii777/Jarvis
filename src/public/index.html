@@ -6,7 +6,7 @@
   <title>JARVIS — Command Center</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Widgets/widgets.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@400;700;900&display=swap');
   </style>
@@ -99,20 +99,20 @@
         <pre id="memory-stream" class="memory-stream"></pre>
       </div>
 
+      <!-- GOD'S EYE: Layer Controls -->
+      <div class="panel glass gods-eye-panel">
+        <div id="layer-panel"></div>
+      </div>
+
     </section>
 
     <!-- CENTER COLUMN: Map + Hologram + Chat -->
     <section class="col-center">
 
-      <!-- World Map -->
+      <!-- World Map (Cesium 3D Globe) -->
       <div class="panel glass map-panel" data-i18n-title="world_map">
-        <div class="panel-title">🗺 <span data-i18n="world_map">WORLD MAP — LIVE TRACKER</span></div>
-        <div id="world-map" class="world-map"></div>
-        <div class="map-legend">
-          <span class="legend-item"><span class="legend-dot dot-cyan"></span> <span data-i18n="active_node">Active Node</span></span>
-          <span class="legend-item"><span class="legend-dot dot-green"></span> <span data-i18n="weather_station">Weather Station</span></span>
-          <span class="legend-item"><span class="legend-dot dot-amber"></span> <span data-i18n="news_source">News Source</span></span>
-        </div>
+        <div class="panel-title">🗺 <span data-i18n="world_map">GOD'S EYE — 3D GLOBE</span></div>
+        <div id="globe-container" class="world-map"></div>
       </div>
 
       <!-- Hologram + Chat row -->
@@ -197,7 +197,7 @@
 
   </main>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Cesium.js"></script>
   <script type="importmap">
   {
     "imports": {
@@ -206,6 +206,7 @@
   }
   </script>
   <script type="module" src="scene.js"></script>
+  <script src="globe.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -124,72 +124,17 @@
     els.memoryStream.textContent = memLines.join("\n");
   }
 
-  /* ==================== WORLD MAP (Leaflet) ==================== */
-  let map = null, mapMarkers = [];
+  /* ==================== 3D GLOBE (Cesium) ==================== */
   function initMap() {
-    if (!window.L) { console.warn("Leaflet not loaded"); return; }
-    map = L.map("world-map", {
-      center: [20, 0], zoom: 2, minZoom: 2, maxZoom: 8,
-      zoomControl: false, attributionControl: false, scrollWheelZoom: true,
-      worldCopyJump: true
-    });
-    /* dark tiles via CSS filter - no API key needed */
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      subdomains: "abc", maxZoom: 19, opacity: 0.6
-    }).addTo(map);
-    L.control.zoom({ position: "bottomright" }).addTo(map);
-
-    /* fix size after layout settles so map isn't black */
-    setTimeout(() => { if (map) map.invalidateSize(); }, 300);
-    setTimeout(() => { if (map) map.invalidateSize(); }, 1000);
-    window.addEventListener("resize", () => { if (map) map.invalidateSize(); });
-
-    // Add weather cities
-    const cities = [
-      { name: "New York", lat: 40.71, lon: -74.01 },
-      { name: "London", lat: 51.51, lon: -0.13 },
-      { name: "Tokyo", lat: 35.68, lon: 139.69 },
-      { name: "Sydney", lat: -33.87, lon: 151.21 },
-      { name: "Dubai", lat: 25.20, lon: 55.27 },
-      { name: "Singapore", lat: 1.35, lon: 103.82 },
-      { name: "Mumbai", lat: 19.08, lon: 72.88 },
-      { name: "Berlin", lat: 52.52, lon: 13.41 },
-      { name: "Sao Paulo", lat: -23.55, lon: -46.63 },
-      { name: "Lagos", lat: 6.52, lon: 3.38 },
-      { name: "Seoul", lat: 37.57, lon: 126.98 },
-      { name: "Hyderabad", lat: 17.39, lon: 78.49 },
-    ];
-    const newsHubs = [
-      { name: "BBC London", lat: 51.51, lon: -0.13 },
-      { name: "CNN Atlanta", lat: 33.75, lon: -84.39 },
-      { name: "NHK Tokyo", lat: 35.68, lon: 139.69 },
-    ];
-    const techHubs = [
-      { name: "Silicon Valley", lat: 37.39, lon: -122.08 },
-      { name: "Shenzhen", lat: 22.54, lon: 114.06 },
-      { name: "Bangalore", lat: 12.97, lon: 77.59 },
-    ];
-
-    const cyanIcon = L.divIcon({ className: "", html: '<div style="width:10px;height:10px;border-radius:50%;background:#00ffff;box-shadow:0 0 12px #00ffff,0 0 24px rgba(0,255,255,0.4);border:1px solid rgba(0,255,255,0.6);"></div>', iconSize: [10, 10], iconAnchor: [5, 5] });
-    const greenIcon = L.divIcon({ className: "", html: '<div style="width:9px;height:9px;border-radius:50%;background:#00ff88;box-shadow:0 0 10px #00ff88,0 0 20px rgba(0,255,136,0.4);"></div>', iconSize: [9, 9], iconAnchor: [5, 5] });
-    const amberIcon = L.divIcon({ className: "", html: '<div style="width:9px;height:9px;border-radius:50%;background:#ff0080;box-shadow:0 0 10px #ff0080,0 0 20px rgba(255,0,128,0.4);"></div>', iconSize: [9, 9], iconAnchor: [5, 5] });
-
-    cities.forEach(c => {
-      const m = L.marker([c.lat, c.lon], { icon: cyanIcon }).addTo(map).bindPopup('<b>' + c.name + '</b><br>Loading weather...');
-      mapMarkers.push({ marker: m, city: c.name, type: "weather" });
-    });
-    newsHubs.forEach(c => L.marker([c.lat, c.lon], { icon: amberIcon }).addTo(map).bindPopup('<div style="color:#ff0080;font-family:monospace;"><b>' + c.name + '</b><br>News Source</div>'));
-    techHubs.forEach(c => L.marker([c.lat, c.lon], { icon: greenIcon }).addTo(map).bindPopup('<div style="color:#00ff88;font-family:monospace;"><b>' + c.name + '</b><br>Tech Hub</div>'));
+    if (typeof initGlobe === "function") {
+      initGlobe();
+    } else {
+      console.warn("Globe module not loaded");
+    }
   }
 
   function updateMapWeather(weatherData) {
-    if (!map || !weatherData) return;
-    weatherData.forEach(wx => {
-      const entry = mapMarkers.find(m => m.city === wx.city && m.type === "weather");
-      if (entry) {
-        entry.marker.setPopupContent('<div style="color:#00ffff;font-family:monospace;"><b style="color:#ff0080;">' + wx.city + '</b><br>' + wx.temp + '°C — ' + wx.condition + '<br>Wind: ' + wx.wind + ' km/h | Humidity: ' + wx.humidity + '%</div>');
-      }
-    });
+    // Weather markers are now handled by the globe layer system
   }
 
   /* ==================== WEATHER ==================== */
@@ -410,4 +355,8 @@
   fetchTech(); setInterval(fetchTech, 120000);
   fetchBreaking(); setInterval(fetchBreaking, 60000);
   setInterval(() => { if (recog && !recogStarted && !state.thinking && !state.speaking) autoRestart(); }, 3000);
+
+  /* ==================== GOD'S EYE: Network & Surveillance ==================== */
+  // Network scanning and camera management now handled by globe layer system
+  // Old code removed — layers are managed via globe.js toggle panel
 })();
