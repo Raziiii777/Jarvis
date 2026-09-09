@@ -1,4 +1,5 @@
-<img width="846" height="885" alt="Screenshot 2026-08-18 at 4 42 24 PM" src="https://github.com/user-attachments/assets/93b0f572-7a6b-4d0f-84ba-5eadf231a7e7" />
+<img width="1704" height="1023" alt="Screenshot 2026-09-09 at 12 13 41 AM" src="https://github.com/user-attachments/assets/f02bb7af-727f-42ed-85f9-fe755adbcab7" />
+
 
 # JARVIS
 
